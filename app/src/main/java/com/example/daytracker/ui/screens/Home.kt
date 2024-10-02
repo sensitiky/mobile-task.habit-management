@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.daytracker.data.model.Habit
 import com.example.daytracker.ui.viewmodel.HabitViewModel
+import java.sql.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -45,6 +48,8 @@ fun Home(imagePainter: Painter, habitViewModel: HabitViewModel) {
         title = "Track Your Life",
         subtitle = "Daily Tasks",
         habits = habits,
+        onHabitCreate = habitViewModel::createHabit,
+        onHabitDelete = habitViewModel::deleteHabit,
         onHabitUpdate = habitViewModel::updateHabit
     )
 }
@@ -55,6 +60,8 @@ fun HomeScreen(
     title: String,
     subtitle: String,
     habits: List<Habit>,
+    onHabitCreate: (Habit) -> Unit,
+    onHabitDelete: (Habit) -> Unit,
     onHabitUpdate: (Habit) -> Unit
 ) {
     Column(
@@ -79,15 +86,28 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(habits) { habit ->
-                HabitCard(habit, onHabitUpdate = onHabitUpdate)
+                HabitCard(habit, onHabitUpdate = onHabitUpdate, onHabitDelete = onHabitDelete)
             }
+        }
+        Button(onClick = {
+            val newHabit = Habit(
+                id = habits.size + 1,
+                title = "New Habit",
+                description = "Description of the new habit",
+                createdAt = Timestamp(System.currentTimeMillis()),
+                updatedAt = Timestamp(System.currentTimeMillis()),
+                complete = false
+            )
+            onHabitCreate(newHabit)
+        }) {
+            Text("Create Habit")
         }
     }
 }
 
 
 @Composable
-fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit) {
+fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit, onHabitDelete: (Habit) -> Unit) {
     val editable = remember { mutableStateOf(false) }
     var newTitle by remember { mutableStateOf(habit.title) }
     val formatter = SimpleDateFormat("dd/MM - E/MM", Locale.getDefault())
@@ -147,6 +167,12 @@ fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit) {
                             contentDescription = "Save changes"
                         )
                     }
+                }
+                IconButton(onClick = { onHabitDelete(habit) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Habit"
+                    )
                 }
             }
         }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -16,28 +17,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.daytracker.data.model.User
+import com.example.daytracker.ui.viewmodel.ContextViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(viewModel: ContextViewModel) {
     Scaffold() {
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
             Box(modifier = Modifier.height(100.dp)) { }
-            Column { Header() }
+            Column {
+                Header(onDismiss = {
+                    viewModel.logoutUser()
+                })
+            }
         }
     }
 
 }
 
 @Composable
-fun Header() {
+fun Header(onDismiss: () -> Unit) {
     Box(modifier = Modifier.height(100.dp)) { }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .size(200.dp)
+            .size(250.dp)
             .padding(top = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -54,7 +60,10 @@ fun Header() {
             user.name,
             style = MaterialTheme.typography.displayLarge
         )
-        Text(user.email,
-            style=MaterialTheme.typography.bodyMedium)
+        Text(
+            user.email,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Button(onClick = onDismiss) { Text("Cerrar Sesión") }
     }
 }

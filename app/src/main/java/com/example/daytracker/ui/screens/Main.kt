@@ -14,11 +14,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.daytracker.R
 import com.example.daytracker.data.model.Habit
 import com.example.daytracker.ui.components.BottomAppBarState
+import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
 import java.sql.Timestamp
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: ContextViewModel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomAppBarState(navController) },
@@ -36,21 +37,12 @@ fun MainScreen() {
                     mutableStateListOf(
                         Habit(
                             1,
-                            "Habit 1",
-                            "Description 1",
+                            "Drink Water",
+                            "Drink 8 glasses of water",
                             "",
                             Timestamp(System.currentTimeMillis()),
                             Timestamp(System.currentTimeMillis()),
                             false
-                        ),
-                        Habit(
-                            2,
-                            "Habit 2",
-                            "Description 2",
-                            "",
-                            Timestamp(System.currentTimeMillis()),
-                            Timestamp(System.currentTimeMillis()),
-                            true
                         )
                     )
                 }
@@ -60,7 +52,7 @@ fun MainScreen() {
                 TasksScreen()
             }
             composable("profile") {
-                ProfileScreen()
+                ProfileScreen(viewModel)
             }
         }
     }

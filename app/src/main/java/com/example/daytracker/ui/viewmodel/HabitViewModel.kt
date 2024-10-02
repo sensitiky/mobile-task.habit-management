@@ -4,8 +4,14 @@ import androidx.compose.runtime.mutableStateListOf
 import com.example.daytracker.data.model.Habit
 
 class HabitViewModel(initialHabits: List<Habit>) {
-    public var mutableHabits = mutableStateListOf<Habit>().apply {
+    var mutableHabits = mutableStateListOf<Habit>().apply {
         addAll(initialHabits)
+    }
+    fun createHabit(habit: Habit) {
+        mutableHabits.add(habit)
+    }
+    fun deleteHabit(habit: Habit) {
+        mutableHabits.remove(habit)
     }
 
     fun updateHabit(updateHabit: Habit) {
