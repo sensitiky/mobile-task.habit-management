@@ -22,10 +22,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,6 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import com.example.daytracker.data.model.Habit
+import com.example.daytracker.ui.components.SearchBar
+import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
@@ -41,16 +45,21 @@ import java.util.Locale
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun Home(imagePainter: Painter, habitViewModel: HabitViewModel) {
-    val habits = remember { habitViewModel.mutableHabits }
+fun Home(
+    imagePainter: Painter,
+    habitViewModel: HabitViewModel,
+    contextViewModel: ContextViewModel
+) {
+    val habits by habitViewModel.habit.observeAsState(emptyList())
     HomeScreen(
         imagePainter = imagePainter,
-        title = "Track Your Life",
-        subtitle = "Daily Tasks",
+        title = "Quick Tracker",
+        subtitle = "Manage your habits",
         habits = habits,
         onHabitCreate = habitViewModel::createHabit,
         onHabitDelete = habitViewModel::deleteHabit,
-        onHabitUpdate = habitViewModel::updateHabit
+        onHabitUpdate = habitViewModel::updateHabit,
+        viewModel = contextViewModel
     )
 }
 
@@ -62,49 +71,52 @@ fun HomeScreen(
     habits: List<Habit>,
     onHabitCreate: (Habit) -> Unit,
     onHabitDelete: (Habit) -> Unit,
-    onHabitUpdate: (Habit) -> Unit
+    onHabitUpdate: (Habit) -> Unit,
+    viewModel: ContextViewModel
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Image(
+    Scaffold(topBar = { SearchBar(viewModel) }) { paddingValues ->
+        Column(
             modifier = Modifier
-                .width(300.dp)
-                .height(200.dp)
-                .padding(top = 20.dp),
-            painter = imagePainter,
-            contentDescription = "Tracker Logo"
-        )
-        Text(text = title, style = MaterialTheme.typography.headlineMedium)
-        Text(text = subtitle, style = MaterialTheme.typography.bodyLarge)
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(habits) { habit ->
-                HabitCard(habit, onHabitUpdate = onHabitUpdate, onHabitDelete = onHabitDelete)
-            }
-        }
-        Button(onClick = {
-            val newHabit = Habit(
-                id = habits.size + 1,
-                title = "New Habit",
-                description = "Description of the new habit",
-                createdAt = Timestamp(System.currentTimeMillis()),
-                updatedAt = Timestamp(System.currentTimeMillis()),
-                complete = false
+            Image(
+                modifier = Modifier
+                    .width(100.dp)
+                    .height(200.dp)
+                    .padding(top = 20.dp),
+                painter = imagePainter,
+                contentDescription = "Tracker Logo"
             )
-            onHabitCreate(newHabit)
-        }) {
-            Text("Create Habit")
+            Text(text = title, style = MaterialTheme.typography.headlineMedium)
+            Text(text = subtitle, style = MaterialTheme.typography.bodyLarge)
+            Button(onClick = {
+                val newHabit = Habit(
+                    id = habits.size + 1,
+                    title = "New Habit",
+                    description = "Description of the new habit",
+                    createdAt = Timestamp(System.currentTimeMillis()),
+                    updatedAt = Timestamp(System.currentTimeMillis()),
+                    complete = false
+                )
+                onHabitCreate(newHabit)
+            }) {
+                Text("Create Habit")
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(habits) { habit ->
+                    HabitCard(habit, onHabitUpdate = onHabitUpdate, onHabitDelete = onHabitDelete)
+                }
+            }
         }
     }
 }
-
 
 @Composable
 fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit, onHabitDelete: (Habit) -> Unit) {

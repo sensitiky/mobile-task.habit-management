@@ -1,3 +1,5 @@
+package com.example.daytracker.data.repository
+
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

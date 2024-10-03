@@ -1,23 +1,26 @@
 package com.example.daytracker.ui.viewmodel
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.example.daytracker.data.model.Habit
 
-class HabitViewModel(initialHabits: List<Habit>) {
-    var mutableHabits = mutableStateListOf<Habit>().apply {
-        addAll(initialHabits)
-    }
+class HabitViewModel(initialHabits: List<Habit>) : ViewModel() {
+    private val _habit = MutableLiveData<List<Habit>>(initialHabits)
+    val habit: LiveData<List<Habit>> = _habit
+
     fun createHabit(habit: Habit) {
-        mutableHabits.add(habit)
+        _habit.value = _habit.value?.toMutableList()?.apply { add(habit) }
     }
+
     fun deleteHabit(habit: Habit) {
-        mutableHabits.remove(habit)
+        _habit.value=_habit.value?.toMutableList()?.apply { remove(habit) }
     }
 
     fun updateHabit(updateHabit: Habit) {
-        val index = mutableHabits.indexOfFirst { it.id == updateHabit.id }
-        if (index >= 0) {
-            mutableHabits[index] = updateHabit
+        _habit.value = _habit.value?.toMutableList()?.apply {
+            val index = indexOfFirst { it.id == updateHabit.id }
+            set(index, updateHabit)
         }
     }
 }

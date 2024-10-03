@@ -46,7 +46,7 @@ fun MainScreen(viewModel: ContextViewModel) {
                         )
                     )
                 }
-                Home(imagePainter, habitViewModel = HabitViewModel(habits))
+                Home(imagePainter, habitViewModel = HabitViewModel(habits), viewModel)
             }
             composable("tasks") {
                 TasksScreen()

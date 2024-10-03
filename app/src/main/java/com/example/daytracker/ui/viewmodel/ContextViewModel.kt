@@ -1,35 +1,40 @@
 package com.example.daytracker.ui.viewmodel
 
-import ContextRepository
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.Flow
+import com.example.daytracker.data.model.User
+import com.example.daytracker.data.repository.ContextRepository
+import com.example.daytracker.data.repository.UserRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class ContextViewModel(context: Context) : ViewModel() {
-    private val repository = ContextRepository(context)
-    val isUserLoggedIn: Flow<Boolean> = repository.isUserLoggedIn
-    fun loginUser() {
+class ContextViewModel(
+    private val userRepository: UserRepository,
+    private val contextRepository: ContextRepository
+) : ViewModel() {
+
+    private val _user = MutableStateFlow(User())
+    val user: StateFlow<User> get() = _user
+
+    val isUserLoggedIn = contextRepository.isUserLoggedIn
+
+    init {
         viewModelScope.launch {
-            repository.setSessionActive(true)
+            userRepository.user.collect { userData ->
+                _user.value = userData
+            }
         }
     }
-
+    fun loginUser(){
+        viewModelScope.launch {
+            contextRepository.setSessionActive(true)
+        }
+    }
     fun logoutUser() {
-       viewModelScope.launch {
-           repository.setSessionActive(false)
-       }
-    }
-}
-
-class ContextViewModelFactory(private val context: Context):ViewModelProvider.Factory{
-    override fun <T:ViewModel>create(modelClass:Class<T>):T{
-        if(modelClass.isAssignableFrom(ContextViewModel::class.java)){
-            @Suppress("UNCHECKED_CAST")
-            return ContextViewModel(context) as T
+        viewModelScope.launch {
+            contextRepository.setSessionActive(false)
+            _user.value = User()
         }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
