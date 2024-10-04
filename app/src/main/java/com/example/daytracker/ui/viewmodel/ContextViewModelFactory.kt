@@ -9,9 +9,9 @@ class ContextViewModelFactory(
     private val userRepository: UserRepository,
     private val contextRepository: ContextRepository
 ) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ContextViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
             return ContextViewModel(userRepository, contextRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

@@ -14,18 +14,20 @@ import com.example.daytracker.ui.viewmodel.ContextViewModelFactory
 @Composable
 fun AppScreen() {
     val context = LocalContext.current
-    val userApi = UserApi.create("https://api.example.com")
+    val userApi = UserApi.create("http://example.com")
     val userRepository = UserRepository(userApi, context)
     val contextRepository = ContextRepository(context)
     val viewModel: ContextViewModel =
         viewModel(factory = ContextViewModelFactory(userRepository, contextRepository))
     val isUserLoggedIn by viewModel.isUserLoggedIn.collectAsState(initial = false)
+
     if (isUserLoggedIn) {
         MainScreen(viewModel)
     } else {
-        WelcomeScreen(onDismiss = {
-            viewModel.loginUser()
-        })
+        WelcomeScreen(
+            onLoginDismiss = { username, password ->
+                viewModel.loginUser(username, password)
+            }
+        )
     }
-
 }

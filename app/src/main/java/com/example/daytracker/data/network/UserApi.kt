@@ -8,10 +8,8 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
-data class Credentials(val username: String, val password: String)
-
 interface UserApi {
-    @POST("/login/{username}{password}")
+    @POST("/login/{username}/{password}")
     suspend fun login(
         @Path("username") username: String,
         @Path("password") password: String

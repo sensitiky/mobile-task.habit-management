@@ -14,7 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,7 +25,7 @@ import com.example.daytracker.ui.theme.Typography
 
 @Composable
 fun Slider(slider: List<Sliders>) {
-    var currentSlider by remember { mutableStateOf(0) }
+    var currentSlider by remember { mutableIntStateOf(0) }
     val current = slider[currentSlider]
 
     Column(
