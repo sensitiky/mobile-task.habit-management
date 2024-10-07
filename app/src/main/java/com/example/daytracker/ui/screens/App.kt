@@ -15,7 +15,7 @@ import com.example.daytracker.ui.viewmodel.ContextViewModelFactory
 fun AppScreen() {
     val context = LocalContext.current
     //TODO implement the server URL without hardcoding
-    val userApi = UserApi.create("http://localhost:121212")
+    val userApi = UserApi.create("CHANGE_ME")
     val userRepository = UserRepository(userApi, context)
     val contextRepository = ContextRepository(context)
     val viewModel: ContextViewModel =

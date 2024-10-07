@@ -16,6 +16,7 @@ import com.example.daytracker.data.model.Habit
 import com.example.daytracker.ui.components.BottomAppBarState
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
+import com.example.daytracker.ui.viewmodel.TasksViewModel
 
 @Composable
 fun MainScreen(viewModel: ContextViewModel) {
@@ -36,7 +37,7 @@ fun MainScreen(viewModel: ContextViewModel) {
                 Home(imagePainter, habitViewModel = HabitViewModel(habits), viewModel)
             }
             composable("tasks") {
-                TasksScreen()
+                TasksScreen(taskViewModel = TasksViewModel())
             }
             composable("profile") {
                 ProfileScreen(viewModel)

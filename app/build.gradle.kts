@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.daytracker"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
