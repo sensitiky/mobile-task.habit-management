@@ -17,11 +17,11 @@ class ContextViewModel(
     private val contextRepository: ContextRepository
 ) : ViewModel() {
 
-    // Exponer el estado del usuario
+    //Expose the user state flow
     val user: StateFlow<User> = userRepository.user
         .stateIn(viewModelScope, SharingStarted.Lazily, User())
 
-    // Exponer el estado de sesión desde ContextRepository
+    //Expose the user logged in state flow
     val isUserLoggedIn: StateFlow<Boolean> = contextRepository.isUserLoggedIn
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
@@ -33,23 +33,23 @@ class ContextViewModel(
                     val user = response.body()
                     if (user != null) {
                         Log.d("ContextViewModel", "Login exitoso para: ${user.name}")
-                        // Actualizar el estado de sesión
+                        // Update the session state
                         contextRepository.setSessionActive(true)
-                        // Los cambios en isUserLoggedIn serán reflejados automáticamente
+                        // Changes in isUserLoggedIn will be automatically reflected
                     } else {
                         Log.e("ContextViewModel", "Respuesta de usuario es nula")
-                        // Manejar el caso donde el cuerpo de la respuesta es nulo
+                        // Handle the case where the response body is null
                     }
                 } else {
                     Log.e(
                         "ContextViewModel",
                         "Error de login: ${response.code()} - ${response.message()}"
                     )
-                    // Manejar errores de la respuesta, como credenciales inválidas
+                    // Handle response errors, such as invalid credentials
                 }
             } catch (e: Exception) {
                 Log.e("ContextViewModel", "Excepción durante el login", e)
-                // Manejar excepciones, como problemas de red
+                // Handle exceptions, such as network problems
             }
         }
     }
@@ -62,23 +62,23 @@ class ContextViewModel(
                     val user = response.body()
                     if (user != null) {
                         Log.d("ContextViewModel", "Registro exitoso para: ${user.name}")
-                        // Actualizar el estado de sesión
+                        // Update the session state
                         contextRepository.setSessionActive(true)
-                        // Los cambios en isUserLoggedIn serán reflejados automáticamente
+                        // Changes in isUserLoggedIn will be automatically reflected
                     } else {
                         Log.e("ContextViewModel", "Respuesta de usuario es nula")
-                        // Manejar el caso donde el cuerpo de la respuesta es nulo
+                        // Handle the case where the response body is null
                     }
                 } else {
                     Log.e(
                         "ContextViewModel",
                         "Error de registro: ${response.code()} - ${response.message()}"
                     )
-                    // Manejar errores de la respuesta, como credenciales inválidas
+                    // Handle response errors, such as email already in use
                 }
             } catch (e: Exception) {
                 Log.e("ContextViewModel", "Excepción durante el registro", e)
-                // Manejar excepciones, como problemas de red
+                // Handle exceptions, such as network problems
             }
         }
     }
@@ -87,7 +87,7 @@ class ContextViewModel(
         viewModelScope.launch {
             contextRepository.setSessionActive(false)
             Log.d("ContextViewModel", "Usuario deslogueado")
-            // Opcional: Limpiar los datos del usuario si es necesario
+            // Optionally, clear the user data
         }
     }
 }

@@ -89,7 +89,7 @@ fun TasksScreen(
                 title = "New Task",
                 description = "Description of the new task",
                 completed = false
-                // Asegúrate de inicializar completedDate si es necesario
+                // Make sure to initialize completedDate if necessary
             )
             taskViewModel.createTask(newTask)
         }) {
@@ -124,7 +124,7 @@ fun TaskCard(
     var newTitle by remember { mutableStateOf(task.title) }
     var newDescription by remember { mutableStateOf(task.description) }
     val swipeableState = rememberSwipeableState(initialValue = 0)
-    val anchors = mapOf(0f to 0, 300f to 1) // Ajusta el valor 300f según sea necesario
+    val anchors = mapOf(0f to 0, 300f to 1) // Adjust the value 300f as necessary
 
     Box {
         Card(
@@ -154,13 +154,13 @@ fun TaskCard(
                         TextField(
                             value = newTitle,
                             onValueChange = { newTitle = it },
-                            label = { Text("Título") },
+                            label = { Text("Title") },
                             modifier = Modifier.fillMaxWidth()
                         )
                         TextField(
                             value = newDescription,
                             onValueChange = { newDescription = it },
-                            label = { Text("Descripción") },
+                            label = { Text("Description") },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Row(
@@ -168,14 +168,15 @@ fun TaskCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Button(onClick = {
-                                val updatedTask = task.copy(title = newTitle, description = newDescription)
+                                val updatedTask =
+                                    task.copy(title = newTitle, description = newDescription)
                                 onTaskUpdate(updatedTask)
                                 editable = false
                             }) {
-                                Text("Guardar")
+                                Text("Save")
                             }
                             Button(onClick = { editable = false }) {
-                                Text("Cancelar")
+                                Text("Cancel")
                             }
                         }
                     } else {
@@ -184,16 +185,16 @@ fun TaskCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Button(onClick = { editable = true }) {
-                                Text("Editar")
+                                Text("Edit")
                             }
                             Button(onClick = { onTaskDelete(task) }) {
-                                Text("Eliminar")
+                                Text("Delete")
                             }
                         }
                     }
                     Icon(
                         imageVector = Icons.Default.Swipe,
-                        contentDescription = "Deslizar para ver progreso",
+                        contentDescription = "Swipe to see progress",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
@@ -201,7 +202,7 @@ fun TaskCard(
         }
 
         if (swipeableState.currentValue == 1) {
-            // Mostrar el gráfico cuando se deslice
+            // Show the graph when swiped
             TaskProgressGraph(
                 completedTasksPerDay = getCompletedTasksPerDay(),
                 modifier = Modifier
@@ -218,7 +219,7 @@ fun TaskProgressGraph(
     completedTasksPerDay: List<Pair<String, Int>>,
     modifier: Modifier = Modifier
 ) {
-    // Dimensiones del gráfico
+    // Graph dimensions
     val graphHeight = 200f
     val graphWidth = 300f
 
@@ -229,13 +230,13 @@ fun TaskProgressGraph(
         val width = size.width - padding * 2
         val height = size.height - padding * 2
 
-        // Filtrar los últimos 30 días si es necesario
+        // Filter the last 30 days if necessary
         val data = completedTasksPerDay.takeLast(30)
 
         if (data.isEmpty()) {
             drawContext.canvas.nativeCanvas.apply {
                 drawText(
-                    "No hay datos para mostrar",
+                    "No data to display",
                     size.width / 2,
                     size.height / 2,
                     android.graphics.Paint().apply {
@@ -249,10 +250,10 @@ fun TaskProgressGraph(
             return@Canvas
         }
 
-        // Encontrar el valor máximo para escalar el gráfico
+        // Find the maximum value to scale the graph
         val maxY = data.maxOfOrNull { it.second }?.toFloat() ?: 1f
 
-        // Dibujar ejes
+        // Draw axes
         drawLine(
             color = Color.Black,
             start = Offset(padding, padding),
@@ -266,14 +267,14 @@ fun TaskProgressGraph(
             strokeWidth = 2f
         )
 
-        // Calcular los puntos del gráfico
+        // Calculate the graph points
         val points = data.mapIndexed { index, pair ->
             val x = padding + (width / (data.size - 1)) * index
             val y = size.height - padding - (pair.second / maxY) * height
             Offset(x, y)
         }
 
-        // Dibujar líneas del gráfico
+        // Draw graph lines
         for (i in 0 until points.size - 1) {
             drawLine(
                 color = Color(0xFF0D47A1),
@@ -283,7 +284,7 @@ fun TaskProgressGraph(
             )
         }
 
-        // Dibujar puntos
+        // Draw points
         points.forEach { point ->
             drawCircle(
                 color = Color.Red,
@@ -292,7 +293,7 @@ fun TaskProgressGraph(
             )
         }
 
-        // Dibujar etiquetas del eje Y
+        // Draw Y-axis labels
         val paintY = android.graphics.Paint().apply {
             color = android.graphics.Color.BLACK
             textSize = 30f
@@ -312,7 +313,7 @@ fun TaskProgressGraph(
             )
         }
 
-        // Dibujar etiquetas del eje X (últimos 7 días por simplicidad)
+        // Draw X-axis labels (last 7 days for simplicity)
         val paintX = android.graphics.Paint().apply {
             color = android.graphics.Color.BLACK
             textSize = 30f
@@ -339,14 +340,14 @@ fun TaskProgressGraph(
 }
 
 fun generateSampleData(): List<Pair<String, Int>> {
-    // Genera datos de muestra para los últimos 30 días
+    // Generate sample data for the last 30 days
     val data = mutableListOf<Pair<String, Int>>()
     val calendar = Calendar.getInstance()
     for (i in 29 downTo 0) {
         val day = calendar.clone() as Calendar
         day.add(Calendar.DAY_OF_MONTH, -i)
         val dayStr = "${day.get(Calendar.DAY_OF_MONTH)}/${day.get(Calendar.MONTH) + 1}"
-        // Simula la cantidad de tareas completadas (0 a 5)
+        // Simulate the number of tasks completed (0 to 5)
         val tasksCompleted = (0..5).random()
         data.add(Pair(dayStr, tasksCompleted))
     }
