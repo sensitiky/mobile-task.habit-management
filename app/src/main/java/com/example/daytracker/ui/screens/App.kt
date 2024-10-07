@@ -14,7 +14,8 @@ import com.example.daytracker.ui.viewmodel.ContextViewModelFactory
 @Composable
 fun AppScreen() {
     val context = LocalContext.current
-    val userApi = UserApi.create("http://example.com")
+    //TODO implement the server URL without hardcoding
+    val userApi = UserApi.create("http://localhost:121212")
     val userRepository = UserRepository(userApi, context)
     val contextRepository = ContextRepository(context)
     val viewModel: ContextViewModel =
@@ -27,6 +28,9 @@ fun AppScreen() {
         WelcomeScreen(
             onLoginDismiss = { username, password ->
                 viewModel.loginUser(username, password)
+            },
+            onRegisterDismiss = { name, email, password ->
+                viewModel.registerUser(name, email, password)
             }
         )
     }

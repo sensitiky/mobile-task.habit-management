@@ -54,6 +54,35 @@ class ContextViewModel(
         }
     }
 
+    fun registerUser(name: String, email: String, password: String) {
+        viewModelScope.launch {
+            try {
+                val response: Response<User> = userRepository.register(name, email, password)
+                if (response.isSuccessful) {
+                    val user = response.body()
+                    if (user != null) {
+                        Log.d("ContextViewModel", "Registro exitoso para: ${user.name}")
+                        // Actualizar el estado de sesión
+                        contextRepository.setSessionActive(true)
+                        // Los cambios en isUserLoggedIn serán reflejados automáticamente
+                    } else {
+                        Log.e("ContextViewModel", "Respuesta de usuario es nula")
+                        // Manejar el caso donde el cuerpo de la respuesta es nulo
+                    }
+                } else {
+                    Log.e(
+                        "ContextViewModel",
+                        "Error de registro: ${response.code()} - ${response.message()}"
+                    )
+                    // Manejar errores de la respuesta, como credenciales inválidas
+                }
+            } catch (e: Exception) {
+                Log.e("ContextViewModel", "Excepción durante el registro", e)
+                // Manejar excepciones, como problemas de red
+            }
+        }
+    }
+
     fun logoutUser() {
         viewModelScope.launch {
             contextRepository.setSessionActive(false)

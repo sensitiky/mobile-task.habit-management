@@ -15,9 +15,10 @@ interface UserApi {
         @Path("password") password: String
     ): Response<User>
 
-    @POST("/register/{username}{password}")
+    @POST("/register/{username}/{email}/{password}")
     suspend fun register(
         @Path("username") username: String,
+        @Path("email") email: String,
         @Path("password") password: String
     ): Response<User>
 

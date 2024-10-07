@@ -1,6 +1,8 @@
 package com.example.daytracker.ui.screens
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.daytracker.data.model.Habit
 import com.example.daytracker.ui.components.SearchBar
@@ -41,6 +45,7 @@ import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
 import java.sql.Timestamp
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 @SuppressLint("MutableCollectionMutableState")
@@ -122,13 +127,23 @@ fun HomeScreen(
 fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit, onHabitDelete: (Habit) -> Unit) {
     val editable = remember { mutableStateOf(false) }
     var newTitle by remember { mutableStateOf(habit.title) }
+    var newDescription by remember { mutableStateOf(habit.description) }
+    var newDate by remember { mutableStateOf(habit.updatedAt) }
     val formatter = SimpleDateFormat("dd/MM - E/MM", Locale.getDefault())
-
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance().apply { timeInMillis = newDate.time }
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = CardDefaults.elevatedCardElevation()
+        elevation = CardDefaults.elevatedCardElevation(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -142,18 +157,41 @@ fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit, onHabitDelete: (Habi
                     TextField(
                         value = newTitle,
                         onValueChange = { newTitle = it },
-                        label = { Text("Title") }
+                        label = { Text("Title") },
+                        colors = TextFieldDefaults.colors(MaterialTheme.colorScheme.onSurface),
                     )
+                    TextField(
+                        value = newDescription,
+                        onValueChange = { newDescription = it },
+                        label = { Text("Description") },
+                        colors = TextFieldDefaults.colors(MaterialTheme.colorScheme.onSurface),
+                    )
+                    Button(onClick = {
+                        val datePickerDialog = DatePickerDialog(
+                            context,
+                            { _, selectedYear, selectedMonth, selectedDayOfMonth ->
+                                val newCalendar = Calendar.getInstance()
+                                newCalendar.set(selectedYear, selectedMonth, selectedDayOfMonth)
+                                newDate = Timestamp(calendar.timeInMillis)
+                            },
+                            year,
+                            month,
+                            day
+                        )
+                        datePickerDialog.show()
+                    }) {
+                        Text("Select Date")
+                    }
                 } else {
                     Text(text = habit.title, style = MaterialTheme.typography.bodyLarge)
+                    Text(text = habit.description, style = MaterialTheme.typography.bodyMedium)
                 }
-                Text(text = habit.description, style = MaterialTheme.typography.bodyMedium)
                 Text(
                     text = formatter.format(habit.createdAt),
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = formatter.format(habit.updatedAt),
+                    text = formatter.format(newDate),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -168,9 +206,13 @@ fun HabitCard(habit: Habit, onHabitUpdate: (Habit) -> Unit, onHabitDelete: (Habi
                         contentDescription = if (editable.value) "Cancel" else "Edit"
                     )
                 }
-                if (editable.value) {
+                AnimatedVisibility(visible = editable.value) {
                     IconButton(onClick = {
-                        val updateHabit = habit.copy(title = newTitle)
+                        val updateHabit = habit.copy(
+                            title = newTitle,
+                            description = newDescription,
+                            updatedAt = newDate
+                        )
                         onHabitUpdate(updateHabit)
                         editable.value = false
                     }) {

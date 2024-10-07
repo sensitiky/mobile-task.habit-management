@@ -18,11 +18,16 @@ import androidx.compose.ui.res.painterResource
 import com.example.daytracker.R
 import com.example.daytracker.data.model.Sliders
 import com.example.daytracker.ui.components.Login
+import com.example.daytracker.ui.components.Register
 import com.example.daytracker.ui.components.Slider
 
 @Composable
-fun WelcomeScreen(onLoginDismiss: (String, String) -> Unit) {
+fun WelcomeScreen(
+    onLoginDismiss: (String, String) -> Unit,
+    onRegisterDismiss: (String, String, String) -> Unit
+) {
     var showLogin by remember { mutableStateOf(false) }
+    var showRegister by remember { mutableStateOf(false) }
 
     Scaffold { paddingValues ->
         Column(
@@ -33,25 +38,37 @@ fun WelcomeScreen(onLoginDismiss: (String, String) -> Unit) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (showLogin) {
-                Login(onLogin = onLoginDismiss)
-            } else {
-                Slider(
-                    slider = listOf(
-                        Sliders(
-                            title = "Welcome to TaskHand",
-                            description = "Every task & project in one place",
-                            image = painterResource(id = R.drawable.taskhand),
-                            onDismiss = { showLogin = true }
-                        ),
-                        Sliders(
-                            title = "Improved productivity",
-                            description = "Get more done with less effort",
-                            image = painterResource(id = R.drawable.taskhand),
-                            onDismiss = { showLogin = true }
+            when {
+                showLogin -> {
+                    Login(
+                        onLogin = onLoginDismiss,
+                        onRegisterClick = { showRegister = true; showLogin = false }
+                    )
+                }
+
+                showRegister -> {
+                    Register(onRegister = onRegisterDismiss,
+                        onLoginClick = { showLogin = true; showRegister = false })
+                }
+
+                else -> {
+                    Slider(
+                        slider = listOf(
+                            Sliders(
+                                title = "Welcome to TaskHand",
+                                description = "Every task & project in one place",
+                                image = painterResource(id = R.drawable.taskhand),
+                                onDismiss = { showLogin = true }
+                            ),
+                            Sliders(
+                                title = "Improved productivity",
+                                description = "Get more done with less effort",
+                                image = painterResource(id = R.drawable.taskhand),
+                                onDismiss = { showLogin = true }
+                            )
                         )
                     )
-                )
+                }
             }
         }
     }

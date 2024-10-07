@@ -30,7 +30,9 @@ class UserRepository(private val userApi: UserApi, context: Context) {
         return response
     }
 
-    suspend fun register(username: String, password: String) = userApi.register(username, password)
+    suspend fun register(username: String, email: String, password: String) =
+        userApi.register(username, email, password)
+
     suspend fun getUser() = userApi.getUser()
 
     val user: Flow<User> = dataStore.data.map { preferences ->

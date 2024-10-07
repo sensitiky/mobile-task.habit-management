@@ -16,7 +16,6 @@ import com.example.daytracker.data.model.Habit
 import com.example.daytracker.ui.components.BottomAppBarState
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
-import java.sql.Timestamp
 
 @Composable
 fun MainScreen(viewModel: ContextViewModel) {
@@ -33,19 +32,7 @@ fun MainScreen(viewModel: ContextViewModel) {
         ) {
             composable("home") {
                 val imagePainter = painterResource(id = R.drawable.tracker)
-                val habits = remember {
-                    mutableStateListOf(
-                        Habit(
-                            1,
-                            "Drink Water",
-                            "Drink 8 glasses of water",
-                            "",
-                            Timestamp(System.currentTimeMillis()),
-                            Timestamp(System.currentTimeMillis()),
-                            false
-                        )
-                    )
-                }
+                val habits = remember { mutableStateListOf<Habit>() }
                 Home(imagePainter, habitViewModel = HabitViewModel(habits), viewModel)
             }
             composable("tasks") {
