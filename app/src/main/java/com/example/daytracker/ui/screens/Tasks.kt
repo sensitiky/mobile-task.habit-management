@@ -1,6 +1,5 @@
 package com.example.daytracker.ui.screens
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -9,17 +8,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Swipe
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -31,9 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +36,6 @@ import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import com.example.daytracker.data.model.Tasks
 import com.example.daytracker.ui.viewmodel.TasksViewModel
-import java.util.Calendar
 
 @Composable
 fun TasksScreen(
@@ -89,7 +81,6 @@ fun TasksScreen(
                 title = "New Task",
                 description = "Description of the new task",
                 completed = false
-                // Make sure to initialize completedDate if necessary
             )
             taskViewModel.createTask(newTask)
         }) {
@@ -103,8 +94,7 @@ fun TasksScreen(
                 TaskCard(
                     task = task,
                     onTaskUpdate = taskViewModel::updateTask,
-                    onTaskDelete = taskViewModel::deleteTask,
-                    getCompletedTasksPerDay = taskViewModel::getCompletedTasksPerDay
+                    onTaskDelete = taskViewModel::deleteTask
                 )
             }
         }
@@ -116,8 +106,7 @@ fun TasksScreen(
 fun TaskCard(
     task: Tasks,
     onTaskUpdate: (Tasks) -> Unit,
-    onTaskDelete: (Tasks) -> Unit,
-    getCompletedTasksPerDay: () -> List<Pair<String, Int>>
+    onTaskDelete: (Tasks) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var editable by remember { mutableStateOf(false) }
@@ -192,164 +181,8 @@ fun TaskCard(
                             }
                         }
                     }
-                    Icon(
-                        imageVector = Icons.Default.Swipe,
-                        contentDescription = "Swipe to see progress",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
                 }
             }
         }
-
-        if (swipeableState.currentValue == 1) {
-            // Show the graph when swiped
-            TaskProgressGraph(
-                completedTasksPerDay = getCompletedTasksPerDay(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp)
-            )
-        }
     }
-}
-
-@Composable
-fun TaskProgressGraph(
-    completedTasksPerDay: List<Pair<String, Int>>,
-    modifier: Modifier = Modifier
-) {
-    // Graph dimensions
-    val graphHeight = 200f
-    val graphWidth = 300f
-
-    Canvas(
-        modifier = modifier
-    ) {
-        val padding = 40f
-        val width = size.width - padding * 2
-        val height = size.height - padding * 2
-
-        // Filter the last 30 days if necessary
-        val data = completedTasksPerDay.takeLast(30)
-
-        if (data.isEmpty()) {
-            drawContext.canvas.nativeCanvas.apply {
-                drawText(
-                    "No data to display",
-                    size.width / 2,
-                    size.height / 2,
-                    android.graphics.Paint().apply {
-                        color = android.graphics.Color.BLACK
-                        textSize = 40f
-                        textAlign = android.graphics.Paint.Align.CENTER
-                        isAntiAlias = true
-                    }
-                )
-            }
-            return@Canvas
-        }
-
-        // Find the maximum value to scale the graph
-        val maxY = data.maxOfOrNull { it.second }?.toFloat() ?: 1f
-
-        // Draw axes
-        drawLine(
-            color = Color.Black,
-            start = Offset(padding, padding),
-            end = Offset(padding, size.height - padding),
-            strokeWidth = 2f
-        )
-        drawLine(
-            color = Color.Black,
-            start = Offset(padding, size.height - padding),
-            end = Offset(size.width - padding, size.height - padding),
-            strokeWidth = 2f
-        )
-
-        // Calculate the graph points
-        val points = data.mapIndexed { index, pair ->
-            val x = padding + (width / (data.size - 1)) * index
-            val y = size.height - padding - (pair.second / maxY) * height
-            Offset(x, y)
-        }
-
-        // Draw graph lines
-        for (i in 0 until points.size - 1) {
-            drawLine(
-                color = Color(0xFF0D47A1),
-                start = points[i],
-                end = points[i + 1],
-                strokeWidth = 3f
-            )
-        }
-
-        // Draw points
-        points.forEach { point ->
-            drawCircle(
-                color = Color.Red,
-                radius = 4f,
-                center = point
-            )
-        }
-
-        // Draw Y-axis labels
-        val paintY = android.graphics.Paint().apply {
-            color = android.graphics.Color.BLACK
-            textSize = 30f
-            textAlign = android.graphics.Paint.Align.RIGHT
-            isAntiAlias = true
-        }
-
-        val numberOfYAxisLabels = 5
-        for (i in 0..numberOfYAxisLabels) {
-            val label = ((maxY / numberOfYAxisLabels) * i).toInt().toString()
-            val y = size.height - padding - (i / numberOfYAxisLabels.toFloat()) * height
-            drawContext.canvas.nativeCanvas.drawText(
-                label,
-                padding - 10,
-                y + 10,
-                paintY
-            )
-        }
-
-        // Draw X-axis labels (last 7 days for simplicity)
-        val paintX = android.graphics.Paint().apply {
-            color = android.graphics.Color.BLACK
-            textSize = 30f
-            textAlign = android.graphics.Paint.Align.CENTER
-            isAntiAlias = true
-        }
-
-        val daysToShow = 7
-        val step = if (data.size < daysToShow) 1 else data.size / daysToShow
-        for (i in 0 until daysToShow) {
-            val index = i * step
-            if (index < data.size) {
-                val x = padding + (width / (data.size - 1)) * index
-                val day = data[index].first
-                drawContext.canvas.nativeCanvas.drawText(
-                    day,
-                    x,
-                    size.height - padding + 30,
-                    paintX
-                )
-            }
-        }
-    }
-}
-
-fun generateSampleData(): List<Pair<String, Int>> {
-    // Generate sample data for the last 30 days
-    val data = mutableListOf<Pair<String, Int>>()
-    val calendar = Calendar.getInstance()
-    for (i in 29 downTo 0) {
-        val day = calendar.clone() as Calendar
-        day.add(Calendar.DAY_OF_MONTH, -i)
-        val dayStr = "${day.get(Calendar.DAY_OF_MONTH)}/${day.get(Calendar.MONTH) + 1}"
-        // Simulate the number of tasks completed (0 to 5)
-        val tasksCompleted = (0..5).random()
-        data.add(Pair(dayStr, tasksCompleted))
-    }
-    return data
 }

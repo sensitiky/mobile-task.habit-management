@@ -91,8 +91,7 @@ fun HomeScreen(
             Image(
                 modifier = Modifier
                     .width(100.dp)
-                    .height(200.dp)
-                    .padding(top = 20.dp),
+                    .height(200.dp),
                 painter = imagePainter,
                 contentDescription = "Tracker Logo"
             )
