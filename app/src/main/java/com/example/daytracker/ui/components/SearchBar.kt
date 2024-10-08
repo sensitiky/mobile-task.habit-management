@@ -15,6 +15,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.daytracker.R
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 
 @Composable
@@ -27,10 +28,21 @@ fun SearchBar(viewModel: ContextViewModel) {
     ) {
         TextField(
             value = "",
-            onValueChange = {},
+            onValueChange = {
+                println("Search: $it")
+            },
             modifier = Modifier
                 .weight(1f)
                 .size(48.dp),
+            leadingIcon = {
+                AsyncImage(
+                    model = R.drawable.tracker,
+                    contentDescription = "User Avatar",
+                    modifier = Modifier
+                        .size(35.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                )
+            },
             placeholder = { Text("Search...", style = TextStyle(textAlign = TextAlign.Center)) },
             trailingIcon = {
                 AsyncImage(

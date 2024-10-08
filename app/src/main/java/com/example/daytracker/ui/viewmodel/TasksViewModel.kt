@@ -1,13 +1,17 @@
 package com.example.daytracker.ui.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.daytracker.data.model.Tasks
-import java.util.Calendar
+import com.example.daytracker.data.repository.TaskRepository
+import kotlinx.coroutines.launch
 
-class TasksViewModel : ViewModel() {
-    private val _task = MutableLiveData<List<Tasks>>(emptyList())
+class TasksViewModel(context: Context) : ViewModel() {
+    private val taskRepository = TaskRepository(context)
+    private val _task = MutableLiveData(taskRepository.getTasksBlocking())
     val task: LiveData<List<Tasks>> = _task
 
     fun createTask(task: Tasks) {
@@ -18,30 +22,19 @@ class TasksViewModel : ViewModel() {
         _task.value = _task.value?.toMutableList()?.apply { remove(task) }
     }
 
-    fun updateTask(updatedTask: Tasks) {
+    fun updateTask(updateTask: Tasks) {
         _task.value = _task.value?.toMutableList()?.apply {
-            val index = indexOfFirst { it.id == updatedTask.id }
-            if (index != -1) set(index, updatedTask)
+            val index = indexOfFirst { it.id == updateTask.id }
+            set(index, updateTask)
         }
+        saveTask()
     }
-    fun getCompletedTasksPerDay(): List<Pair<String, Int>> {
-        val tasks = task.value ?: return emptyList()
-        val calendar = Calendar.getInstance()
-        val data = mutableListOf<Pair<String, Int>>()
-        for (i in 29 downTo 0) {
-            val day = calendar.clone() as Calendar
-            day.add(Calendar.DAY_OF_MONTH, -i)
-            val dayStr = "${day.get(Calendar.DAY_OF_MONTH)}/${day.get(Calendar.MONTH) + 1}"
-            val tasksCompleted = tasks.count {
-                it.completedDate?.let { date ->
-                    val taskCal = Calendar.getInstance().apply { time = date }
-                    taskCal.get(Calendar.DAY_OF_MONTH) == day.get(Calendar.DAY_OF_MONTH) &&
-                            taskCal.get(Calendar.MONTH) == day.get(Calendar.MONTH) &&
-                            taskCal.get(Calendar.YEAR) == day.get(Calendar.YEAR)
-                } ?: false
+
+    private fun saveTask() {
+        viewModelScope.launch {
+            _task.value?.let {
+                taskRepository.saveTasks(it)
             }
-            data.add(Pair(dayStr, tasksCompleted))
         }
-        return data
     }
 }

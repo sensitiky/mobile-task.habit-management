@@ -3,15 +3,12 @@ package com.example.daytracker.ui.screens
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -36,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.daytracker.data.model.Habit
@@ -51,13 +47,11 @@ import java.util.Locale
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun Home(
-    imagePainter: Painter,
     habitViewModel: HabitViewModel,
     contextViewModel: ContextViewModel
 ) {
     val habits by habitViewModel.habit.observeAsState(emptyList())
     HomeScreen(
-        imagePainter = imagePainter,
         title = "Quick Tracker",
         subtitle = "Manage your habits",
         habits = habits,
@@ -70,7 +64,6 @@ fun Home(
 
 @Composable
 fun HomeScreen(
-    imagePainter: Painter,
     title: String,
     subtitle: String,
     habits: List<Habit>,
@@ -88,13 +81,6 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Image(
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(200.dp),
-                painter = imagePainter,
-                contentDescription = "Tracker Logo"
-            )
             Text(text = title, style = MaterialTheme.typography.headlineMedium)
             Text(text = subtitle, style = MaterialTheme.typography.bodyLarge)
             Button(onClick = {

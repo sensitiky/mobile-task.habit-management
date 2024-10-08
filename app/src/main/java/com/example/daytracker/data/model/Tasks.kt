@@ -1,15 +1,18 @@
 package com.example.daytracker.data.model
 
+import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 import java.sql.Date
 
+@Serializable
 class Tasks(
     var id: Int = 0,
     var title: String = "",
     var description: String = "",
-    var date: String = "",
-    var time: String = "",
+    private var date: String = "",
+    private var time: String = "",
     var completed: Boolean = false,
-    var completedDate: Date? = null
+    @Contextual var completedDate: Date? = null
 ) {
     fun copy(
         id: Int = this.id,
