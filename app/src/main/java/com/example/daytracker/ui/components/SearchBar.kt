@@ -9,6 +9,9 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
@@ -21,15 +24,16 @@ import com.example.daytracker.ui.viewmodel.ContextViewModel
 @Composable
 fun SearchBar(viewModel: ContextViewModel) {
     val user by viewModel.user.collectAsState()
+    var query by remember { mutableStateOf("") }
     Row(
         modifier = Modifier
             .padding(10.dp)
             .clip(RoundedCornerShape(40.dp))
     ) {
         TextField(
-            value = "",
+            value = query,
             onValueChange = {
-                println("Search: $it")
+                query = it
             },
             modifier = Modifier
                 .weight(1f)

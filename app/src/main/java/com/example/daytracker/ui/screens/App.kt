@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.daytracker.BuildConfig
 import com.example.daytracker.data.network.UserApi
 import com.example.daytracker.data.repository.ContextRepository
 import com.example.daytracker.data.repository.UserRepository
@@ -14,8 +15,9 @@ import com.example.daytracker.ui.viewmodel.ContextViewModelFactory
 @Composable
 fun AppScreen() {
     val context = LocalContext.current
-    //TODO implement the server URL without hardcoding
-    val userApi = UserApi.create("CHANGE_ME")
+    val apiKey = BuildConfig.API_KEY
+    println(apiKey)
+    val userApi = UserApi.create(apiKey)
     val userRepository = UserRepository(userApi, context)
     val contextRepository = ContextRepository(context)
     val viewModel: ContextViewModel =
