@@ -11,6 +11,7 @@ import com.example.daytracker.data.repository.ContextRepository
 import com.example.daytracker.data.repository.UserRepository
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.ContextViewModelFactory
+import com.example.daytracker.ui.viewmodel.TasksViewModel
 
 @Composable
 fun AppScreen() {
@@ -23,9 +24,10 @@ fun AppScreen() {
     val viewModel: ContextViewModel =
         viewModel(factory = ContextViewModelFactory(userRepository, contextRepository))
     val isUserLoggedIn by viewModel.isUserLoggedIn.collectAsState(initial = false)
+    val task = TasksViewModel(context)
 
     if (isUserLoggedIn) {
-        MainScreen(viewModel)
+        MainScreen(viewModel, task)
     } else {
         WelcomeScreen(
             onLoginDismiss = { username, password ->

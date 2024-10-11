@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.daytracker.data.model.Tasks
 import com.example.daytracker.data.repository.TaskRepository
 import kotlinx.coroutines.launch
+import java.sql.Date
 
 class TasksViewModel(context: Context) : ViewModel() {
     private val taskRepository = TaskRepository(context)
@@ -28,6 +29,15 @@ class TasksViewModel(context: Context) : ViewModel() {
             set(index, updateTask)
         }
         saveTask()
+    }
+
+    fun completedTask(task: Tasks) {
+        val updatedTask = task.copy(completed = true, completedDate = Date(System.currentTimeMillis()))
+        updateTask(updatedTask)
+    }
+    fun unCompletedTask(task: Tasks) {
+        val updatedTask = task.copy(completed = false, completedDate = null)
+        updateTask(updatedTask)
     }
 
     private fun saveTask() {

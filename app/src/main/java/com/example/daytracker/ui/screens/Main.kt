@@ -16,7 +16,7 @@ import com.example.daytracker.ui.viewmodel.HabitViewModel
 import com.example.daytracker.ui.viewmodel.TasksViewModel
 
 @Composable
-fun MainScreen(viewModel: ContextViewModel) {
+fun MainScreen(viewModel: ContextViewModel,task: TasksViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val habitViewModel = remember { HabitViewModel(context) }
@@ -35,10 +35,10 @@ fun MainScreen(viewModel: ContextViewModel) {
                 Home(habitViewModel = habitViewModel, viewModel)
             }
             composable("tasks") {
-                TasksScreen(taskViewModel = taskViewModel)
+                TasksScreen(taskViewModel = taskViewModel,viewModel)
             }
             composable("profile") {
-                ProfileScreen(viewModel)
+                ProfileScreen(viewModel,task)
             }
         }
     }

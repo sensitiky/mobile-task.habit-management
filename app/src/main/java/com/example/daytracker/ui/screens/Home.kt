@@ -15,6 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,7 +38,7 @@ fun Home(
     val user by contextViewModel.user.collectAsState()
     HomeScreen(
         title = "Welcome ${user.name}",
-        subtitle = "Your active habits ${habits.size}",
+        subtitle = "Your current habits: ${habits.size}",
         habits = habits,
         onHabitCreate = habitViewModel::createHabit,
         onHabitDelete = habitViewModel::deleteHabit,
@@ -54,7 +57,17 @@ fun HomeScreen(
     onHabitUpdate: (Habit) -> Unit,
     viewModel: ContextViewModel
 ) {
-    Scaffold(topBar = { SearchBar(viewModel) }) { paddingValues ->
+    val habitCounter = habits.size
+    var query by remember { mutableStateOf("") }
+    val filteredHabits = habits.filter {
+        it.title.contains(query, ignoreCase = true) || it.description.contains(
+            query,
+            ignoreCase = true
+        )
+    }
+    Scaffold(
+        topBar = { SearchBar(viewModel, onQueryChange = { query = it }) }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -68,7 +81,7 @@ fun HomeScreen(
             Button(onClick = {
                 val newHabit = Habit(
                     id = habits.size + 1,
-                    title = "New Habit",
+                    title = "New Habit ${habitCounter + 1}",
                     description = "Description of the new habit",
                     createdAt = Timestamp(System.currentTimeMillis()),
                     updatedAt = Timestamp(System.currentTimeMillis()),
@@ -76,14 +89,18 @@ fun HomeScreen(
                 )
                 onHabitCreate(newHabit)
             }) {
-                Text("Create Habit")
+                Text("Add Habit")
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(habits) { habit ->
-                    HabitCard(habit, onHabitUpdate = onHabitUpdate, onHabitDelete = onHabitDelete)
+                items(filteredHabits) { habit ->
+                    HabitCard(
+                        habit = habit,
+                        onHabitUpdate = onHabitUpdate,
+                        onHabitDelete = onHabitDelete
+                    )
                 }
             }
         }

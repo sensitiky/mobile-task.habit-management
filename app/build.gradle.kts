@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.compose.material)
     implementation(libs.kotlinx.serialization.json.v151)
+    implementation(libs.firebase.dataconnect)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

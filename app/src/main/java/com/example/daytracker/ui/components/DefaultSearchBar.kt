@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -17,12 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import com.example.daytracker.R
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 
 @Composable
-fun SearchBar(viewModel: ContextViewModel, onQueryChange: (String) -> Unit) {
+fun DefaultSearchBar(viewModel: ContextViewModel, onQueryChange: (String) -> Unit) {
     val user by viewModel.user.collectAsState()
     var query by remember { mutableStateOf("") }
     Row(
@@ -39,23 +40,16 @@ fun SearchBar(viewModel: ContextViewModel, onQueryChange: (String) -> Unit) {
             modifier = Modifier
                 .weight(1f)
                 .size(48.dp),
-            leadingIcon = {
-                AsyncImage(
-                    model = R.drawable.tracker,
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(35.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                )
-            },
             placeholder = { Text("Search...", style = TextStyle(textAlign = TextAlign.Center)) },
             trailingIcon = {
-                AsyncImage(
-                    model = user.avatar,
+                Icon(
+                    Icons.Default.Search,
                     contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(35.dp)
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(
+                            RoundedCornerShape(20.dp)
+                        )
                 )
             }
         )

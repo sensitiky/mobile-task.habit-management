@@ -25,6 +25,7 @@ runtimeLivedata = "1.7.2"
 roomKtx = "2.6.1"
 composeMaterial = "1.4.0"
 secretsGradlePlugin = "2.0.1"
+firebaseDataconnect = "16.0.0-beta01"
 
 [libraries]
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
@@ -58,6 +59,7 @@ kotlinx-serialization-json-v151 = { module = "org.jetbrains.kotlinx:kotlinx-seri
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
+firebase-dataconnect = { group = "com.google.firebase", name = "firebase-dataconnect", version.ref = "firebaseDataconnect" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

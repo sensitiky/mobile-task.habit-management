@@ -1,6 +1,6 @@
 package com.example.daytracker.data.model
 
-import kotlinx.serialization.Contextual
+import com.example.daytracker.data.local.SqlDateSerializer
 import kotlinx.serialization.Serializable
 import java.sql.Date
 
@@ -12,7 +12,7 @@ class Tasks(
     private var date: String = "",
     private var time: String = "",
     var completed: Boolean = false,
-    @Contextual var completedDate: Date? = null
+    @Serializable(with = SqlDateSerializer::class) var completedDate: Date? = null
 ) {
     fun copy(
         id: Int = this.id,
@@ -20,8 +20,9 @@ class Tasks(
         description: String = this.description,
         date: String = this.date,
         time: String = this.time,
-        completed: Boolean = this.completed
+        completed: Boolean = this.completed,
+        completedDate: Date? = this.completedDate
     ): Tasks {
-        return Tasks(id, title, description, date, time, completed)
+        return Tasks(id, title, description, date, time, completed, completedDate)
     }
 }
