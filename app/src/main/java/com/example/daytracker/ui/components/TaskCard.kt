@@ -26,30 +26,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daytracker.data.model.Habit
-import java.sql.Timestamp
+import com.example.daytracker.data.model.Tasks
 
 @Composable
-fun HabitCard(
-    habit: Habit,
-    onHabitUpdate: (Habit) -> Unit,
-    onHabitDelete: (Habit) -> Unit
+fun TaskCard(
+    task: Tasks,
+    onTaskUpdate: (Tasks) -> Unit,
+    onTaskDelete: (Tasks) -> Unit,
+    onTaskComplete: (Tasks) -> Unit,
+    onTaskUncompleted: (Tasks) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var editable by remember { mutableStateOf(false) }
-    var newTitle by remember { mutableStateOf(habit.title) }
-    var newDescription by remember { mutableStateOf(habit.description) }
+    var newTitle by remember { mutableStateOf(task.title) }
+    var newDescription by remember { mutableStateOf(task.description) }
 
-    val cardColor = if (habit.complete) {
+    val cardColor = if (task.completed) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
         MaterialTheme.colorScheme.primaryContainer
     }
 
-    val textColor = if (habit.complete) {
+    val textColor = if (task.completed) {
         MaterialTheme.colorScheme.onSecondaryContainer
     } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
+        MaterialTheme.colorScheme.onErrorContainer
     }
 
     Card(
@@ -71,21 +72,25 @@ fun HabitCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (expanded) newTitle else habit.title,
+                    text = if (expanded) newTitle else task.title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = textColor
                 )
                 Switch(
-                    checked = habit.complete,
+                    checked = task.completed,
                     onCheckedChange = { isChecked ->
-                        onHabitUpdate(habit.copy(complete = isChecked))
+                        if (isChecked) {
+                            onTaskComplete(task)
+                        } else {
+                            onTaskUncompleted(task)
+                        }
                     }
                 )
             }
             if (expanded) {
                 Text(
-                    text = habit.description,
+                    text = newDescription,
                     fontSize = 14.sp,
                     color = textColor
                 )
@@ -108,12 +113,9 @@ fun HabitCard(
                     ) {
                         Button(
                             onClick = {
-                                val updatedHabit = habit.copy(
-                                    title = newTitle,
-                                    description = newDescription,
-                                    updatedAt = Timestamp(System.currentTimeMillis())
-                                )
-                                onHabitUpdate(updatedHabit)
+                                val updatedTask =
+                                    task.copy(title = newTitle, description = newDescription)
+                                onTaskUpdate(updatedTask)
                                 editable = false
                             },
                             modifier = Modifier.weight(1f)
@@ -139,13 +141,13 @@ fun HabitCard(
                             Text("Edit")
                         }
                         OutlinedButton(
-                            onClick = { onHabitDelete(habit) },
+                            onClick = { onTaskDelete(task) },
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Text("Eliminate")
+                            Text("Delete")
                         }
                     }
                 }
