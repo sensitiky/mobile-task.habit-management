@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun Login(onLogin: (String, String) -> Unit, onRegisterClick: () -> Unit) {
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     Column(
@@ -58,8 +58,8 @@ fun Login(onLogin: (String, String) -> Unit, onRegisterClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(32.dp))
         OutlinedTextField(
-            value = username,
-            onValueChange = { username = it },
+            value = email,
+            onValueChange = { email = it },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
@@ -91,7 +91,7 @@ fun Login(onLogin: (String, String) -> Unit, onRegisterClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = { onLogin(username, password) },
+            onClick = { onLogin(email, password) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

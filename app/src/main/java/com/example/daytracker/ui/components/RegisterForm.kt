@@ -39,7 +39,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun Register(onRegister: (String, String, String) -> Unit, onLoginClick: () -> Unit) {
-    var name by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isFormVisible by remember { mutableStateOf(true) }
@@ -70,9 +70,9 @@ fun Register(onRegister: (String, String, String) -> Unit, onLoginClick: () -> U
             )
             Spacer(modifier = Modifier.height(32.dp))
             OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
+                value = username,
+                onValueChange = { username = it },
+                label = { Text("Username") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = TextFieldDefaults.colors(
@@ -117,7 +117,7 @@ fun Register(onRegister: (String, String, String) -> Unit, onLoginClick: () -> U
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    onRegister(name, email, password)
+                    onRegister(username, email, password)
                     isFormVisible = false
                 },
                 modifier = Modifier

@@ -20,13 +20,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Help
+import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.FitnessCenter
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material.icons.outlined.Whatshot
@@ -34,6 +35,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,7 +53,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,15 +69,21 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.daytracker.data.model.Tasks
 import com.example.daytracker.data.model.User
+import com.example.daytracker.ui.components.AdMobBanner
 import com.example.daytracker.ui.theme.Typography
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.TasksViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ProfileScreen(viewModel: ContextViewModel, taskViewModel: TasksViewModel) {
+fun ProfileScreen(
+    viewModel: ContextViewModel,
+    taskViewModel: TasksViewModel,
+    onNavigate: (String) -> Unit
+) {
     val user by viewModel.user.collectAsState()
     val tasks by taskViewModel.task.observeAsState(emptyList())
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -81,7 +92,12 @@ fun ProfileScreen(viewModel: ContextViewModel, taskViewModel: TasksViewModel) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet { DrawerContent(viewModel) }
+            ModalDrawerSheet {
+                DrawerContent(
+                    viewModel,
+                    onNavigate = onNavigate,
+                    onCloseDrawer = { scope.launch { drawerState.close() } })
+            }
         },
         gesturesEnabled = drawerState.isOpen
     ) {
@@ -94,7 +110,7 @@ fun ProfileScreen(viewModel: ContextViewModel, taskViewModel: TasksViewModel) {
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                item { Header(user = user, onLogout = { viewModel.logoutUser() }) }
+                item { Header(user = user) }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
                 item { StatisticsSection() }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -133,13 +149,14 @@ fun TopBar(drawerState: DrawerState, scope: CoroutineScope) {
 }
 
 @Composable
-fun Header(user: User, onLogout: () -> Unit) {
+fun Header(user: User) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        AdMobBanner()
         AsyncImage(
             model = user.avatar,
             contentDescription = "User Avatar",
@@ -159,32 +176,6 @@ fun Header(user: User, onLogout: () -> Unit) {
             style = Typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            StatItem("Posts", "128")
-            StatItem("Followers", "1.2K")
-            StatItem("Following", "350")
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = onLogout,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-        ) {
-            Text("Log Out")
-        }
-    }
-}
-
-@Composable
-fun StatItem(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, style = Typography.titleLarge.copy(fontWeight = FontWeight.Bold))
-        Text(
-            label,
-            style = Typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-        )
     }
 }
 
@@ -369,44 +360,165 @@ fun AchievementItem(title: String, icon: ImageVector) {
 }
 
 @Composable
-fun DrawerContent(viewModel: ContextViewModel) {
+fun Premium() {
+    // Coroutine scope for managing the simulated payment
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
+    var paymentStatus by remember { mutableStateOf<String?>(null) }
+
+    // Function simulating a Stripe payment check
+    fun simulateStripePayment() {
+        scope.launch {
+            isLoading = true
+            delay(2000)
+            val isSuccess = (0..1).random() == 1 // Randomly simulate success or failure
+            paymentStatus = if (isSuccess) "Payment Successful!" else "Payment Failed. Try again."
+            isLoading = false
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Star,
+                contentDescription = "Premium",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(48.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Upgrade to Premium",
+                style = Typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Unlock all features and remove ads",
+                style = Typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Payment status message
+            paymentStatus?.let {
+                Text(
+                    text = it,
+                    color = if (it == "Payment Successful!") MaterialTheme.colorScheme.primary else Color.Red,
+                    style = Typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            // Upgrade button with loading state
+            Button(
+                onClick = { simulateStripePayment() },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier = Modifier
+                    .width(150.dp)
+                    .align(Alignment.CenterHorizontally),
+                shape = RoundedCornerShape(20.dp),
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Upgrade Now")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun DrawerContent(
+    viewModel: ContextViewModel,
+    onNavigate: (String) -> Unit,
+    onCloseDrawer: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Settings", style = Typography.headlineMedium)
+        Text(
+            "Menu",
+            style = Typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.primary
+        )
         Spacer(modifier = Modifier.height(24.dp))
-        DrawerItem("Profile", Icons.Outlined.Person)
-        DrawerItem("Notifications", Icons.Outlined.Notifications)
-        DrawerItem("Privacy", Icons.Outlined.Lock)
-        DrawerItem("Help", Icons.AutoMirrored.Outlined.Help)
+        DrawerItem("Tasks", Icons.AutoMirrored.Outlined.Assignment) {
+            onNavigate("tasks")
+            onCloseDrawer()
+        }
+        DrawerItem("Habits", Icons.Outlined.Repeat) {
+            onNavigate("home")
+            onCloseDrawer()
+        }
+        DrawerItem("Statistics", Icons.Outlined.BarChart) {
+            onNavigate("statistics")
+            onCloseDrawer()
+        }
+        DrawerItem("Settings", Icons.Outlined.Settings) {
+            onNavigate("profile")
+            onCloseDrawer()
+        }
         Spacer(modifier = Modifier.weight(1f))
+        Premium()
+        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { viewModel.logoutUser() },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .width(150.dp)
+                .align(Alignment.CenterHorizontally),
+            shape = RoundedCornerShape(20.dp)
         ) {
+            Icon(
+                Icons.AutoMirrored.Outlined.ExitToApp,
+                contentDescription = "Log Out",
+                modifier = Modifier.size(ButtonDefaults.IconSize)
+            )
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text("Log Out")
         }
     }
 }
 
 @Composable
-fun DrawerItem(title: String, icon: ImageVector) {
+fun DrawerItem(title: String, icon: ImageVector, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 12.dp)
-            .clickable { /* Handle click */ },
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(24.dp)
         )
-        Spacer(modifier = Modifier.width(32.dp))
-        Text(title, style = Typography.bodyLarge)
+        Spacer(modifier = Modifier.width(24.dp))
+        Text(
+            title,
+            style = Typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
     }
 }

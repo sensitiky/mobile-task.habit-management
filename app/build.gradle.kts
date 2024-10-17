@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.kotlinx.serialization.json.v151)
     implementation(libs.firebase.dataconnect)
+    implementation(libs.play.services.ads)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

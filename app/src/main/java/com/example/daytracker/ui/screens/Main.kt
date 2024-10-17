@@ -16,11 +16,11 @@ import com.example.daytracker.ui.viewmodel.HabitViewModel
 import com.example.daytracker.ui.viewmodel.TasksViewModel
 
 @Composable
-fun MainScreen(viewModel: ContextViewModel,task: TasksViewModel) {
+fun MainScreen(viewModel: ContextViewModel, task: TasksViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val habitViewModel = remember { HabitViewModel(context) }
-    val taskViewModel = remember{ TasksViewModel(context) }
+    val taskViewModel = remember { TasksViewModel(context) }
     Scaffold(
         bottomBar = { BottomAppBarState(navController) },
         modifier = Modifier
@@ -35,10 +35,12 @@ fun MainScreen(viewModel: ContextViewModel,task: TasksViewModel) {
                 Home(habitViewModel = habitViewModel, viewModel)
             }
             composable("tasks") {
-                TasksScreen(taskViewModel = taskViewModel,viewModel)
+                TasksScreen(taskViewModel = taskViewModel, viewModel)
             }
             composable("profile") {
-                ProfileScreen(viewModel,task)
+                ProfileScreen(viewModel, task, onNavigate = { route ->
+                    navController.navigate(route)
+                })
             }
         }
     }

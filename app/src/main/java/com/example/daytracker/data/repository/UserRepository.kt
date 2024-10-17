@@ -15,8 +15,8 @@ class UserRepository(private val userApi: UserApi, context: Context) {
     private val userAvatarKey = stringPreferencesKey("user_avatar")
     private val dataStore = context.dataStore
 
-    suspend fun login(username: String, password: String): Response<User> {
-        val response = userApi.login(username, password)
+    suspend fun login(email: String, password: String): Response<User> {
+        val response = userApi.login(email, password)
 
         if (response.isSuccessful) {
             response.body()?.let { user ->

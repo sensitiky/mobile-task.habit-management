@@ -1,152 +1,132 @@
 package com.example.daytracker.ui.components
 
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import coil.compose.rememberAsyncImagePainter
 import com.example.daytracker.data.model.Habit
-import java.sql.Timestamp
 
 @Composable
-fun HabitCard(
+fun HabitItem(
     habit: Habit,
     onHabitUpdate: (Habit) -> Unit,
-    onHabitDelete: (Habit) -> Unit
+    onHabitDelete: (Habit) -> Unit,
+    onExpand: () -> Unit,
+    isPremiumUser: Boolean
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var editable by remember { mutableStateOf(false) }
-    var newTitle by remember { mutableStateOf(habit.title) }
-    var newDescription by remember { mutableStateOf(habit.description) }
-
-    val cardColor = if (habit.complete) {
-        MaterialTheme.colorScheme.secondaryContainer
-    } else {
-        MaterialTheme.colorScheme.primaryContainer
-    }
-
-    val textColor = if (habit.complete) {
-        MaterialTheme.colorScheme.onSecondaryContainer
-    } else {
-        MaterialTheme.colorScheme.onPrimaryContainer
-    }
-
     Card(
-        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable { expanded = !expanded },
-        colors = CardDefaults.cardColors(containerColor = cardColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .clickable(onClick = onExpand),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(habit.title, fontWeight = FontWeight.Bold)
+            Text(habit.description, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+fun ExpandedHabitView(
+    habit: Habit,
+    onDismiss: () -> Unit,
+    onHabitUpdate: (Habit) -> Unit,
+    onHabitDelete: (Habit) -> Unit,
+    isPremiumUser: Boolean
+) {
+    var title by remember { mutableStateOf(habit.title) }
+    var description by remember { mutableStateOf(habit.description) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (expanded) newTitle else habit.title,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textColor
-                )
-                Switch(
-                    checked = habit.complete,
-                    onCheckedChange = { isChecked ->
-                        onHabitUpdate(habit.copy(complete = isChecked))
-                    }
-                )
-            }
-            if (expanded) {
-                Text(
-                    text = habit.description,
-                    fontSize = 14.sp,
-                    color = textColor
-                )
-                if (editable) {
-                    OutlinedTextField(
-                        value = newTitle,
-                        onValueChange = { newTitle = it },
-                        label = { Text("Title") },
-                        modifier = Modifier.fillMaxWidth()
+            Column(modifier = Modifier.padding(16.dp)) {
+                if (isPremiumUser && imageUri != null) {
+                    Image(
+                        painter = rememberAsyncImagePainter(imageUri),
+                        contentDescription = "Habit Image",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        contentScale = ContentScale.Crop
                     )
-                    OutlinedTextField(
-                        value = newDescription,
-                        onValueChange = { newDescription = it },
-                        label = { Text("Description") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                }
+
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                if (isPremiumUser) {
+                    Button(
+                        onClick = { /* Implement image selection logic */ },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Button(
-                            onClick = {
-                                val updatedHabit = habit.copy(
-                                    title = newTitle,
-                                    description = newDescription,
-                                    updatedAt = Timestamp(System.currentTimeMillis())
-                                )
-                                onHabitUpdate(updatedHabit)
-                                editable = false
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Save")
-                        }
-                        OutlinedButton(
-                            onClick = { editable = false },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Cancel")
-                        }
+                        Text("Add Image")
                     }
-                } else {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Button(
+                        onClick = {
+                            onHabitUpdate(habit.copy(title = title, description = description))
+                            onDismiss()
+                        }
                     ) {
-                        Button(
-                            onClick = { editable = true },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Edit")
-                        }
-                        OutlinedButton(
-                            onClick = { onHabitDelete(habit) },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
-                            )
-                        ) {
-                            Text("Eliminate")
-                        }
+                        Text("Save")
+                    }
+                    Button(
+                        onClick = {
+                            onHabitDelete(habit)
+                            onDismiss()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Delete")
                     }
                 }
             }

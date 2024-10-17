@@ -41,7 +41,7 @@ fun SearchBar(viewModel: ContextViewModel, onQueryChange: (String) -> Unit) {
                 .size(48.dp),
             leadingIcon = {
                 AsyncImage(
-                    model = R.drawable.tracker,
+                    model = R.drawable.taskhand,
                     contentDescription = "User Avatar",
                     modifier = Modifier
                         .size(35.dp)

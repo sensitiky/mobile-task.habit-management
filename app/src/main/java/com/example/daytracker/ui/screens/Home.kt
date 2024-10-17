@@ -1,15 +1,29 @@
 package com.example.daytracker.ui.screens
 
+import HabitDialog
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,13 +34,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.example.daytracker.data.model.Habit
-import com.example.daytracker.ui.components.HabitCard
+import com.example.daytracker.ui.components.ExpandedHabitView
+import com.example.daytracker.ui.components.HabitItem
 import com.example.daytracker.ui.components.SearchBar
 import com.example.daytracker.ui.viewmodel.ContextViewModel
 import com.example.daytracker.ui.viewmodel.HabitViewModel
-import java.sql.Timestamp
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
@@ -35,29 +54,27 @@ fun Home(
     contextViewModel: ContextViewModel
 ) {
     val habits by habitViewModel.habit.observeAsState(emptyList())
-    val user by contextViewModel.user.collectAsState()
     HomeScreen(
-        title = "Welcome ${user.name}",
-        subtitle = "Your current habits: ${habits.size}",
         habits = habits,
         onHabitCreate = habitViewModel::createHabit,
         onHabitDelete = habitViewModel::deleteHabit,
         onHabitUpdate = habitViewModel::updateHabit,
-        viewModel = contextViewModel
+        viewModel = contextViewModel,
+        isPremiumUser = true
     )
 }
 
 @Composable
 fun HomeScreen(
-    title: String,
-    subtitle: String,
     habits: List<Habit>,
     onHabitCreate: (Habit) -> Unit,
     onHabitDelete: (Habit) -> Unit,
     onHabitUpdate: (Habit) -> Unit,
-    viewModel: ContextViewModel
+    viewModel: ContextViewModel,
+    isPremiumUser: Boolean
 ) {
-    val habitCounter = habits.size
+    var showDialog by remember { mutableStateOf(false) }
+    var expandedHabitId by remember { mutableStateOf<Int?>(null) }
     var query by remember { mutableStateOf("") }
     val filteredHabits = habits.filter {
         it.title.contains(query, ignoreCase = true) || it.description.contains(
@@ -65,44 +82,107 @@ fun HomeScreen(
             ignoreCase = true
         )
     }
-    Scaffold(
-        topBar = { SearchBar(viewModel, onQueryChange = { query = it }) }
-    ) { paddingValues ->
+    val user by viewModel.user.collectAsState()
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(16.dp)
+                .blur(if (expandedHabitId != null) 10.dp else 0.dp)
         ) {
-            Text(text = title, style = MaterialTheme.typography.headlineMedium)
-            Text(text = subtitle, style = MaterialTheme.typography.bodyLarge)
-            Button(onClick = {
-                val newHabit = Habit(
-                    id = habits.size + 1,
-                    title = "New Habit ${habitCounter + 1}",
-                    description = "Description of the new habit",
-                    createdAt = Timestamp(System.currentTimeMillis()),
-                    updatedAt = Timestamp(System.currentTimeMillis()),
-                    complete = false
+            SearchBar(viewModel, onQueryChange = { query = it })
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Welcome ${user.name}",
+                    style = MaterialTheme.typography.displayLarge,
+                    color = Color.Gray.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
                 )
-                onHabitCreate(newHabit)
-            }) {
-                Text("Add Habit")
             }
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Adaptive(150.dp),
+                modifier = Modifier
+                    .weight(2f)
+                    .fillMaxWidth(),
+                verticalItemSpacing = 16.dp,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(filteredHabits) { habit ->
-                    HabitCard(
+                    HabitItem(
                         habit = habit,
                         onHabitUpdate = onHabitUpdate,
-                        onHabitDelete = onHabitDelete
+                        onHabitDelete = onHabitDelete,
+                        onExpand = { expandedHabitId = habit.id },
+                        isPremiumUser = isPremiumUser
                     )
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = { showDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp)
+                .size(56.dp)
+                .zIndex(if (expandedHabitId != null) -1f else 1f),
+            shape = CircleShape,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Habit")
+        }
+
+        AnimatedVisibility(
+            visible = expandedHabitId != null,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+            ) {
+                expandedHabitId?.let { id ->
+                    val habit = habits.find { it.id == id }
+                    habit?.let {
+                        ExpandedHabitView(
+                            habit = it,
+                            onDismiss = { expandedHabitId = null },
+                            onHabitUpdate = onHabitUpdate,
+                            onHabitDelete = onHabitDelete,
+                            isPremiumUser = isPremiumUser
+                        )
+                    }
+                }
+            }
+        }
+
+        if (showDialog) {
+            HabitDialog(
+                onDismiss = { showDialog = false },
+                onAddHabit = { title, description ->
+                    val newHabit = Habit(
+                        id = habits.size + 1,
+                        title = title,
+                        description = description,
+                        createdAt = System.currentTimeMillis(),
+                        updatedAt = System.currentTimeMillis(),
+                        complete = false
+                    )
+                    onHabitCreate(newHabit)
+                    showDialog = false
+                }
+            )
         }
     }
 }

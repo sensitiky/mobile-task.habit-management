@@ -9,9 +9,9 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface UserApi {
-    @POST("/login/{username}/{password}")
+    @POST("/login/{email}/{password}")
     suspend fun login(
-        @Path("username") username: String,
+        @Path("email") username: String,
         @Path("password") password: String
     ): Response<User>
 

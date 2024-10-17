@@ -22,10 +22,6 @@ class HabitRepository(private val context: Context) {
         }
     }
 
-    suspend fun queryHabit(title: String, description: String): Habit? {
-        return getHabits().first().find { it.title == title || it.description == description }
-    }
-
     private fun getHabits(): Flow<List<Habit>> {
         return dataStore.data.map { preferences ->
             val habitsJSON = preferences[habitsKey] ?: "[]"
