@@ -17,7 +17,6 @@ import com.example.daytracker.ui.viewmodel.TasksViewModel
 fun AppScreen() {
     val context = LocalContext.current
     val apiKey = BuildConfig.API_KEY
-    println(apiKey)
     val userApi = UserApi.create(apiKey)
     val userRepository = UserRepository(userApi, context)
     val contextRepository = ContextRepository(context)

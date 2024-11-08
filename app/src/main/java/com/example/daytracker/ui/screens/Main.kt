@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -16,11 +15,11 @@ import com.example.daytracker.ui.viewmodel.HabitViewModel
 import com.example.daytracker.ui.viewmodel.TasksViewModel
 
 @Composable
-fun MainScreen(viewModel: ContextViewModel, task: TasksViewModel) {
+fun MainScreen(
+    contextViewModel: ContextViewModel,
+    tasksViewModel: TasksViewModel
+) {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val habitViewModel = remember { HabitViewModel(context) }
-    val taskViewModel = remember { TasksViewModel(context) }
     Scaffold(
         bottomBar = { BottomAppBarState(navController) },
         modifier = Modifier
@@ -28,17 +27,24 @@ fun MainScreen(viewModel: ContextViewModel, task: TasksViewModel) {
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = "home",
+            startDestination = "splash",
             modifier = Modifier.padding(paddingValues)
         ) {
+            composable("splash") {
+                SplashScreen(navController)
+            }
             composable("home") {
-                Home(habitViewModel = habitViewModel, viewModel)
+                val habitViewModel = HabitViewModel(LocalContext.current)
+                Home(habitViewModel = habitViewModel, contextViewModel)
             }
             composable("tasks") {
-                TasksScreen(taskViewModel = taskViewModel, viewModel)
+                TasksScreen(taskViewModel = tasksViewModel, contextViewModel)
+            }
+            composable("statistics") {
+                Statistics()
             }
             composable("profile") {
-                ProfileScreen(viewModel, task, onNavigate = { route ->
+                ProfileScreen(contextViewModel, tasksViewModel, onNavigate = { route ->
                     navController.navigate(route)
                 })
             }
